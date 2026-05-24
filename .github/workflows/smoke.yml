@@ -1,0 +1,83 @@
+name: Smoke test (run checks on Ubuntu)
+
+# Actually executes the read-only checks on a real Ubuntu runner so you can see
+# the JSON output without a local Linux machine. Manual trigger + on push.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "scripts/**"
+      - ".github/workflows/smoke.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  run-checks:
+    name: Run PhageGuard checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Prepare output dir
+        run: mkdir -p out
+
+      - name: detect_os
+        run: |
+          set -o pipefail
+          bash scripts/detect_os.sh | tee out/detect_os.json
+
+      - name: inventory
+        run: bash scripts/linux/inventory.sh | tee out/inventory.json
+
+      - name: network
+        run: bash scripts/linux/network.sh | tee out/network.json
+
+      - name: persistence
+        run: bash scripts/linux/persistence.sh | tee out/persistence.json
+
+      - name: recent_changes
+        run: bash scripts/linux/recent_changes.sh --days 7 | tee out/recent_changes.json
+
+      - name: suid_check
+        run: bash scripts/linux/suid_check.sh | tee out/suid.json
+
+      - name: Combine into a single report
+        run: |
+          jq -n \
+            --slurpfile os out/detect_os.json \
+            --slurpfile inventory out/inventory.json \
+            --slurpfile network out/network.json \
+            --slurpfile persistence out/persistence.json \
+            --slurpfile recent out/recent_changes.json \
+            --slurpfile suid out/suid.json \
+            '{
+              run_id: (now | tostring),
+              timestamp: (now | todate),
+              schema_version: "1.0",
+              host: $os[0],
+              checks: {
+                inventory: $inventory[0],
+                network: $network[0],
+                persistence: $persistence[0],
+                recent_changes: $recent[0],
+                suid: $suid[0]
+              }
+            }' | tee out/report.json
+
+      - name: Sanity check (valid JSON, detected linux)
+        run: |
+          test "$(jq -r '.os' out/detect_os.json)" = "linux"
+          jq empty out/report.json
+          echo "All checks ran and produced valid JSON."
+
+      - name: Upload report artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: phageguard-report
+          path: out/*.json
