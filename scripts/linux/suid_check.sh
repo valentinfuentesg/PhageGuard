@@ -31,13 +31,19 @@ fi
 
 # Conservative allowlist of commonly SUID/SGID binaries on mainstream distros.
 # Anything not here is reported as "unexpected" for the analyst to review.
-expected_basenames="sudo su passwd chsh chfn newgrp gpasswd mount umount ping \
-ping6 fusermount fusermount3 pkexec polkit-agent-helper-1 dbus-daemon-launch-helper \
-ssh-agent crontab at wall write expiry unix_chkpwd chage utempter"
+# An array is used deliberately: IFS is set to '\n\t' (no space), so a
+# space-separated string would NOT word-split here.
+expected_basenames=(
+  sudo su passwd chsh chfn newgrp gpasswd mount umount ping ping6
+  fusermount fusermount3 pkexec polkit-agent-helper-1
+  dbus-daemon-launch-helper ssh-agent crontab at wall write expiry
+  unix_chkpwd chage utempter newgidmap newuidmap mount.cifs
+  pam_extrausers_chkpwd
+)
 
 is_expected() {
   local base="$1" w
-  for w in $expected_basenames; do
+  for w in "${expected_basenames[@]}"; do
     [[ "$base" == "$w" ]] && return 0
   done
   return 1
