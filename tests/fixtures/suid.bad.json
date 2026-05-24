@@ -1,0 +1,11 @@
+{
+  "check": "suid",
+  "tools_missing": [],
+  "suid_count": 3,
+  "unexpected_count": 2,
+  "suid_files": [
+    { "path": "/usr/bin/sudo", "mode": "4755", "owner": "root", "expected": true },
+    { "path": "/tmp/.cache/python3", "mode": "4755", "owner": "root", "expected": false },
+    { "path": "/home/dev/.local/bin/backup", "mode": "6755", "owner": "root", "expected": false }
+  ]
+}

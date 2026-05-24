@@ -1,0 +1,15 @@
+{
+  "check": "persistence",
+  "tools_missing": [],
+  "cron": [
+    { "path": "/etc/cron.daily/apt-compat", "mtime": "2026-04-10 12:00:00", "owner": "root", "sha256": "aaaa1111" },
+    { "path": "/etc/cron.daily/logrotate", "mtime": "2026-04-10 12:00:00", "owner": "root", "sha256": "bbbb2222" }
+  ],
+  "systemd": [
+    { "unit": "ssh.service", "state": "enabled" },
+    { "unit": "cron.service", "state": "enabled" }
+  ],
+  "shell_rc": [
+    { "path": "/home/dev/.bashrc", "mtime": "2026-01-02 09:15:00" }
+  ]
+}

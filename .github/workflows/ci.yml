@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install shellcheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Run shellcheck on all scripts
+        run: |
+          shopt -s globstar nullglob
+          files=(scripts/**/*.sh)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No shell scripts found."
+            exit 0
+          fi
+          printf 'Checking: %s\n' "${files[@]}"
+          shellcheck "${files[@]}"
+
+  markdownlint:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install markdownlint-cli
+        run: npm install -g markdownlint-cli@0.41.0
+      - name: Lint markdown
+        run: markdownlint "**/*.md" --ignore node_modules
+
+  json-validate:
+    name: Validate example reports
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate JSON files parse
+        run: |
+          shopt -s globstar nullglob
+          for f in examples/**/*.json; do
+            echo "Validating $f"
+            python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$f"
+          done

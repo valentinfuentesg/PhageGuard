@@ -1,0 +1,21 @@
+# Reports and run artifacts (may contain host data — never commit)
+*.report.json
+reports/
+runs/
+*.log
+
+# OS / editor cruft
+.DS_Store
+Thumbs.db
+*~
+.idea/
+.vscode/
+*.swp
+
+# Local secrets / API keys (e.g. future VirusTotal key)
+.env
+*.key
+secrets.*
+
+# Local agent config (per-machine, not part of the project)
+.claude/settings.local.json

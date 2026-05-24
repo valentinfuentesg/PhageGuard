@@ -1,0 +1,11 @@
+{
+  "check": "suid",
+  "tools_missing": [],
+  "suid_count": 3,
+  "unexpected_count": 0,
+  "suid_files": [
+    { "path": "/usr/bin/sudo", "mode": "4755", "owner": "root", "expected": true },
+    { "path": "/usr/bin/passwd", "mode": "4755", "owner": "root", "expected": true },
+    { "path": "/usr/bin/mount", "mode": "4755", "owner": "root", "expected": true }
+  ]
+}
