@@ -48,17 +48,20 @@ Existing solutions fall into two buckets:
 ## 6. Threat model
 
 ### What PhageGuard defends against
+
 - Casual / commodity malware leaving obvious traces (persistence entries, suspicious processes, known-bad hashes)
 - Misconfigurations and weakened security postures
 - User curiosity ("is something weird going on?")
 
 ### What PhageGuard does NOT defend against
+
 - Sophisticated targeted attacks / nation-state actors
 - Rootkits that hide from standard OS APIs (kernel-level)
 - Firmware/UEFI implants
 - Live attackers actively responding to defender actions
 
 ### PhageGuard's own threat model (attacks against the tool itself)
+
 - **Prompt injection via system output.** Filenames, log contents, process command lines may contain text crafted to manipulate the LLM. **All system-derived data is treated as untrusted input.** The agent must not follow instructions embedded in scanned content.
 - **Privilege abuse.** The agent often runs with elevated permissions. Hard constraints on what it can do without confirmation.
 - **Data exfiltration.** The skill must never transmit user data off the system without explicit consent. No telemetry. No "phone home."
@@ -77,15 +80,17 @@ Existing solutions fall into two buckets:
 ## 8. Roadmap
 
 ### Phase 0 — Foundation (week 1)
+
 - Repo public on GitHub
 - README, LICENSE (Apache 2.0), CONTRIBUTING, CODE_OF_CONDUCT, threat model
 - CI with shellcheck + markdown linting
 - 5–10 `good-first-issue` tickets
 
 ### Phase 1 — Linux MVP, read-only (weeks 2–4)
+
 Single skill, single OS, zero destructive capability.
 
-```
+```text
 phageguard-skill/
 ├── SKILL.md
 ├── scripts/
@@ -105,20 +110,24 @@ phageguard-skill/
 ```
 
 ### Phase 2 — Tool integration (month 2)
+
 - Wrappers over osquery, ClamAV, YARA
 - Optional VirusTotal hash lookup (user-supplied API key)
 - Graceful degradation when tools are absent
 
 ### Phase 3 — macOS + Windows (month 3)
+
 - Same structure, OS-specific scripts
 - Windows: PowerShell + `MpCmdRun.exe` wrapper
 
 ### Phase 4 — Remediation skill (month 4)
+
 - Separate skill: `phageguard-remediate`
 - Only after detection is proven reliable
 - Quarantine before delete, mandatory dry-run, per-item confirmation
 
 ### Phase 5 — Differentiators (month 5+)
+
 - `--explain` mode: didactic explanations for learners
 - `--baseline` mode: hash known-good state, diff later
 - Agent adapters: Claude Code, OpenCode, Aider, Cline

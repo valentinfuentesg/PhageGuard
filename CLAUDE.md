@@ -42,11 +42,13 @@ When asked to add a detection check, follow this structure:
 ## Code style
 
 - **Bash:** strict mode at the top of every script:
+
   ```bash
   #!/usr/bin/env bash
   set -euo pipefail
   IFS=$'\n\t'
   ```
+
 - **JSON output:** use `jq -n` to construct, never string concatenation.
 - **No `eval`. No `curl | sh`. No `wget` to unverified domains.**
 - **Comments in English.** User-facing strings in English for now (i18n later).
